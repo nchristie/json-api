@@ -21,23 +21,22 @@ class OrderCreator
   # Creates an order.
   #
   # Returns an +Order+ object. If that is valid and persisted we can go
-  # ahead an render a 200 in the controller and show the created order.
+  # ahead an render a 2XX in the controller and show the created order.
   # Otherwise, the inquiry is not saved to the DB & relevant errors are
   # added to the instance.
   def publish!
     # Transaction ensures we do not create an order without order_items
-    Order.transaction do
+    begin
       order.save!
       create_order_items(order)
+      order
+    rescue ActiveRecord::RecordInvalid => e
+      order.tap { |o| o.errors.add(:base, "This Product does not exist.") }
+    rescue NoOrderItemsGiven => e
+      order.tap { |o| o.errors.add(:base, e.message) }
+    rescue ActionController::ParameterMissing => e
+      order.tap { |o| o.errors.add(:base, e.message) }
     end
-
-    order
-  rescue ActiveRecord::RecordInvalid => e
-    order.tap { |o| o.errors.add(:base, "This Product does not exist.") }
-  rescue NoOrderItemsGiven => e
-    order.tap { |o| o.errors.add(:base, e.message) }
-  rescue ActionController::ParameterMissing => e
-    order.tap { |o| o.errors.add(:base, e.message) }
   end
 
   private

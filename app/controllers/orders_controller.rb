@@ -1,15 +1,13 @@
 class OrdersController < ApplicationController
-  before_action :set_order, only: [:show, :update, :destroy]
-
   # GET /orders
   def index
     @orders = Order.all
-
     render :index
   end
 
   # GET /orders/1
   def show
+    @order = Order.find(params[:id])
   end
 
   # POST /orders
@@ -24,23 +22,14 @@ class OrdersController < ApplicationController
     end
   end
 
-  # PATCH/PUT /orders/1
-  def update
-    if @order.update(order_params)
-      render :show, status: :ok, location: @order
+  def cancel
+    @order = Order.from_user(user).where(id: params[:id]).first
+
+    if @order
+      OrderManager.user_cancel(@order, "Cancellation from #{user.name}")
+      render nothing: :true, status: :ok, location: order_url(@order)
     else
-      render json: @order.errors, status: :unprocessable_entity
+      render nothing: :true, status: :unprocessable_entity
     end
-  end
-
-  # DELETE /orders/1
-  def destroy
-    @order.destroy
-  end
-
-  private
-
-  def set_order
-    @order = Order.find(params[:id])
   end
 end

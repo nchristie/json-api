@@ -7,6 +7,7 @@ gem 'jbuilder', '~> 2.6'
 gem 'rack-cors'
 gem 's3', '~> 0.3.24'
 gem 'dotenv-rails'
+gem 'state_machines-activerecord'
 
 group :development, :test do
   gem 'byebug', platform: :mri
@@ -17,6 +18,7 @@ group :development, :test do
   gem 'rails-controller-testing'
   gem 'faker'
   gem 'timecop', '~> 0.8.1'
+  gem 'database_cleaner'
 end
 
 group :development do

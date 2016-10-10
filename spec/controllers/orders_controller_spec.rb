@@ -6,10 +6,10 @@ RSpec.describe OrdersController, :type => :controller do
     { format: :json }
   end
 
-  let!(:user) { User.create!(id: 1, name: "test", email: "test@test.com", access_token: "e0b466508d4dcdf459f7") }
+  let!(:user) { User.create!(name: "test", email: "test@test.com", access_token: "e0b466508d4dcdf459f7") }
 
-  let!(:order_1) { FactoryGirl.create(:order_with_items, id: 1) }
-  let!(:order_2) { FactoryGirl.create(:order_with_items, id: 2) }
+  let!(:order_1) { FactoryGirl.create(:order_with_items) }
+  let!(:order_2) { FactoryGirl.create(:order_with_items) }
 
   before { allow(controller).to receive(:user).and_return(user) }
 
@@ -52,14 +52,14 @@ RSpec.describe OrdersController, :type => :controller do
     end
 
     it "returns infomation about the order when it is found" do
-      params[:id] = 1
+      params[:id] = order_1.id
       get :show, params
 
       expect(response.code).to eq "200"
 
       result = JSON.parse(response.body)["order"]
 
-      expect(result["order_id"]).to eq 1
+      expect(result["order_id"]).to eq order_1.id
       #Expand this spec
     end
   end
@@ -68,14 +68,12 @@ RSpec.describe OrdersController, :type => :controller do
     render_views
 
     context "with valid params" do
-      let!(:user) { User.create!(id: 1, name: "test", email: "test@test.com", access_token: "e0b466508d4dcdf459f7") }
-
       let!(:category) { FactoryGirl.create(:category, id: 1) }
 
       let!(:product_1) { FactoryGirl.create(:product, id: 1) }
       let!(:product_2) { FactoryGirl.create(:product, id: 2) }
 
-      let(:order_with_items) { FactoryGirl.create(:order_with_items) }
+      let(:order_with_items) { FactoryGirl.create(:order_with_items, user: user) }
 
       let(:params) {
         order_with_items.attributes.merge(
@@ -99,7 +97,7 @@ RSpec.describe OrdersController, :type => :controller do
 
         order = Order.last
 
-        expect(order.user_id).to eq 1
+        expect(order.user_id).to eq user.id
 
         expect(order.order_items.size).to eq 2
         expect(order.order_items.first.product.name).to eq product_1.name
@@ -141,6 +139,32 @@ RSpec.describe OrdersController, :type => :controller do
 
         expect(result).to have_key("base")
         expect(result["base"]).to eq ["param is missing or the value is empty: order_items"]
+      end
+    end
+  end
+
+  describe "PUT #cancel" do
+    render_views
+
+    context "with valid params" do
+      let!(:order_with_items) { FactoryGirl.create(:order_with_items, id: 99, user: user) }
+
+      it "marks the order as cancelled" do
+        order = Order.find(99)
+
+        expect(order.state).to eq "confirmed"
+
+        params[:id] = 99
+        put :cancel, params
+
+        expect(response.code).to eq "200"
+
+        order.reload
+        expect(order.state).to eq "cancelled"
+      end
+
+      it "does not modify the state of the order if it does not belong to the user" do
+        #TODO
       end
     end
   end

@@ -1,4 +1,5 @@
 json.order_id order.id
+json.state order.state
 json.total order.total
 json.url order_url(order, format: :json)
 

@@ -15,13 +15,12 @@ RSpec.describe OrdersController, :type => :routing do
       expect(:post => "/orders").to route_to("orders#create")
     end
 
-    it "routes to #update" do
+    it "routes to #cancel" do
+      expect(:put => "/orders/1/cancel").to route_to("orders#cancel", :id => "1")
+    end
+
+    xit "routes to #update" do
       expect(:put => "/orders/1").to route_to("orders#update", :id => "1")
     end
-
-    it "routes to #destroy" do
-      expect(:delete => "/orders/1").to route_to("orders#destroy", :id => "1")
-    end
-
   end
 end
