@@ -107,7 +107,6 @@ RSpec.describe OrdersController, :type => :controller do
 
       it "creates a new Order" do
         puts params
-        puts params.to_json
         expect { post :create, params }.to change(Order, :count).by(1)
       end
 
