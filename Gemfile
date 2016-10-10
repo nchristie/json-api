@@ -16,6 +16,7 @@ group :development, :test do
   gem 'shoulda'
   gem 'rails-controller-testing'
   gem 'faker'
+  gem 'timecop', '~> 0.8.1'
 end
 
 group :development do

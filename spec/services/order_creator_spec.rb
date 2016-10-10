@@ -26,7 +26,6 @@ describe OrderCreator do
     let!(:order) { subject.publish! }
 
     it "the order is persisted & free of errors" do
-      # These 2 to be removed.
       expect(order).to be_persisted
       expect(order.errors).to be_empty
 
@@ -35,22 +34,57 @@ describe OrderCreator do
   end
 
   describe "#publish!" do
-    subject { described_class.new(user, params) }
 
-    let!(:order) { subject.publish! }
+    context "when successful" do
+      subject { described_class.new(user, params) }
 
-    it "creates an order with the correct fields" do
-      expect(subject).to be_successful
+      let!(:order) { subject.publish! }
 
-      puts "-----------"
-      puts order.errors
-      puts order.persisted?
-      puts "-----------"
+      it "creates an order with the correct fields" do
+        expect(order.order_items.size).to eq 2
+        expect(order.order_items.first.product_id).to eq product_1.id
+        expect(order.order_items.last.product_id).to eq product_2.id
+      end
+    end
 
-      expect(order.order_items.size).to eq 2
+    context "when unsuccessful" do
+      context "no product given" do
+        let(:params) {
+          order_with_items.attributes.merge(
+            order_items: [
+              # {:product_id => 999, :quantity => 2}
+            ]
+          ).with_indifferent_access
+        }
 
-      expect(order.order_items.first.product_id).to eq product_1.id
-      expect(order.order_items.last.product_id).to eq product_2.id
+        subject { described_class.new(user, params) }
+
+        let!(:order) { subject.publish! }
+
+        it "shows an appropriate error message when no product is given" do
+          expect(order.errors.messages).to have_key(:base)
+          expect(order.errors.messages[:base]).to eq ["Please provide a minimum of one Order Item/Product with your order"]
+        end
+      end
+
+      context "invalid/nonexistent product given" do
+        let(:params) {
+          order_with_items.attributes.merge(
+            order_items: [
+              {:product_id => 999, :quantity => 2}
+            ]
+          ).with_indifferent_access
+        }
+
+        subject { described_class.new(user, params) }
+
+        let!(:order) { subject.publish! }
+
+        it "shows an appropriate error message when no product is given" do
+          expect(order.errors.messages).to have_key(:base)
+          expect(order.errors.messages[:base]).to eq ["This Product does not exist."]
+        end
+      end
     end
   end
 end

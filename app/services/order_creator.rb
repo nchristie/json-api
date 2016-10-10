@@ -25,7 +25,6 @@ class OrderCreator
   # Otherwise, the inquiry is not saved to the DB & relevant errors are
   # added to the instance.
   def publish!
-    puts params
     # Transaction ensures we do not create an order without order_items
     Order.transaction do
       order.save!
@@ -35,8 +34,8 @@ class OrderCreator
     order
   rescue ActiveRecord::RecordInvalid => e
     order.tap { |o| o.errors.add(:base, "This Product does not exist.") }
-  # rescue NoOrderItemsGiven => e
-  #   order.tap { |o| o.errors.add(:base, e.message) }
+  rescue NoOrderItemsGiven => e
+    order.tap { |o| o.errors.add(:base, e.message) }
   rescue ActionController::ParameterMissing => e
     order.tap { |o| o.errors.add(:base, e.message) }
   end
