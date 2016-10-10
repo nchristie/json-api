@@ -86,24 +86,6 @@ RSpec.describe OrdersController, :type => :controller do
     render_views
 
     context "with valid params" do
-      # let!(:product) { FactoryGirl.create(:product, id: 1) }
-
-      # let(:valid_attributes) do
-      #   {
-      #     "order_items" =>
-      #     [
-      #       {"product_id" => "1","quantity" => "4"}
-      #     ]
-      #   }
-      # end
-
-      # let(:params) do
-      #   ActionController::Parameters.new({
-      #     order_items: { product_id: 1, quantity: 2 },
-      #     format: "json"
-      #   })
-      # end
-
       let!(:user) { User.create!(id: 1, name: "test", email: "test@test.com", access_token: "e0b466508d4dcdf459f7") }
 
       let!(:category) { FactoryGirl.create(:category, id: 1) }
@@ -147,18 +129,37 @@ RSpec.describe OrdersController, :type => :controller do
       end
     end
 
-    pending "with invalid params" do
-      it "renders errors when the order could not be created" do
-        #TODO
-        post :create, params
+    context "with invalid params" do
+      let(:order_with_items) { FactoryGirl.create(:order_with_items) }
 
+      let(:invalid_product_params) {
+        order_with_items.attributes.merge(
+          order_items: [ { "a" => 1 } ]
+        ).with_indifferent_access
+      }
+
+      it "renders an informative error if product does not exist" do
+        post :create, invalid_product_params
+        expect(response.code).to eq "422"
+        result = JSON.parse(response.body)
+        expect(result).to have_key("base")
+        expect(result["base"]).to eq ["This Product does not exist."]
+      end
+
+      let(:empty_order_items_params) {
+        order_with_items.attributes.merge(
+          order_items: [ {  } ]
+        ).with_indifferent_access
+      }
+
+      it "renders errors when the order could not be created" do
+        post :create, empty_order_items_params
         expect(response.code).to eq "422"
 
-        payload = JSON.parse(response.body)["response"]
-        errors = payload["errors"]
+        result = JSON.parse(response.body)
 
-        expect(payload).to have_key("errors")
-        expect(errors["base"]).to eq ["Specify the error"]
+        expect(result).to have_key("base")
+        expect(result["base"]).to eq ["param is missing or the value is empty: order_items"]
       end
     end
   end

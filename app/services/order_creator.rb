@@ -35,7 +35,9 @@ class OrderCreator
     order
   rescue ActiveRecord::RecordInvalid => e
     order.tap { |o| o.errors.add(:base, "This Product does not exist.") }
-  rescue NoOrderItemsGiven => e
+  # rescue NoOrderItemsGiven => e
+  #   order.tap { |o| o.errors.add(:base, e.message) }
+  rescue ActionController::ParameterMissing => e
     order.tap { |o| o.errors.add(:base, e.message) }
   end
 
