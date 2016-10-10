@@ -73,7 +73,7 @@ RSpec.describe OrdersController, :type => :controller do
       let!(:product_1) { FactoryGirl.create(:product, id: 1) }
       let!(:product_2) { FactoryGirl.create(:product, id: 2) }
 
-      let(:order_with_items) { FactoryGirl.create(:order_with_items, user: user) }
+      let!(:order_with_items) { FactoryGirl.create(:order_with_items, user: user) }
 
       let(:params) {
         order_with_items.attributes.merge(
@@ -86,7 +86,6 @@ RSpec.describe OrdersController, :type => :controller do
 
 
       it "creates a new Order" do
-        puts params
         expect { post :create, params }.to change(Order, :count).by(1)
       end
 
@@ -163,8 +162,35 @@ RSpec.describe OrdersController, :type => :controller do
         expect(order.state).to eq "cancelled"
       end
 
-      it "does not modify the state of the order if it does not belong to the user" do
-        #TODO
+      it "returns 422 & does not modify the order if it is already cancelled" do
+        order = Order.find(99)
+        order.cancel_order!
+
+        expect(order.reload.state).to eq "cancelled"
+
+        params[:id] = 99
+        put :cancel, params
+
+        expect(response.code).to eq "422"
+        expect(order.reload.state).to eq "cancelled"
+      end
+
+      let!(:second_user) { User.create!(name: "test_2", email: "test2@test.com", access_token: "a0b466508d4dcdf459f7") }
+
+      it "returns a 422 & does not modify the state of the order if it does not belong to the user" do
+        allow(controller).to receive(:user).and_return(second_user)
+
+        params[:id] = 99
+        put :cancel, params
+
+        expect(response.code).to eq "422"
+      end
+
+      it "returns a 422 if the order does not exist at all" do
+        params[:id] = 1045
+        put :cancel, params
+
+        expect(response.code).to eq "422"
       end
     end
   end

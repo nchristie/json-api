@@ -4,6 +4,7 @@ class Order < ApplicationRecord
   has_many :products, through: :order_items
 
   scope :from_user, -> (user) { where(user_id: user.id) }
+  scope :cancellable, -> { where(state: "confirmed") }
 
   VALID_STATES = %w(confirmed cancelled)
 

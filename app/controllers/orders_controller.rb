@@ -2,7 +2,12 @@ class OrdersController < ApplicationController
   # GET /orders
   def index
     @orders = Order.all
-    render :index
+    if @orders
+      render :index, status: :ok
+    else
+      #Render a message
+      render nothing: :true
+    end
   end
 
   # GET /orders/1
@@ -23,7 +28,7 @@ class OrdersController < ApplicationController
   end
 
   def cancel
-    @order = Order.from_user(user).where(id: params[:id]).first
+    @order = Order.from_user(user).cancellable.where(id: params[:id]).first
 
     if @order
       OrderManager.user_cancel(@order, "Cancellation from #{user.name}")
