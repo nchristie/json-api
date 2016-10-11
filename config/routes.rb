@@ -1,7 +1,10 @@
 Rails.application.routes.draw do
-  resources :categories
-  resources :products
   resources :users
+  resources :categories
+
+  resources :products do
+    resources :images, only: [:index, :create]
+  end
 
   resources :orders, only: [:index, :show, :create] do
     put :cancel, on: :member
