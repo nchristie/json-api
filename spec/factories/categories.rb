@@ -1,5 +1,5 @@
 FactoryGirl.define do
   factory :category do
-    name "Test Category"
+    name Faker::Name.name
   end
 end

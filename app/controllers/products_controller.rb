@@ -21,6 +21,36 @@ class ProductsController < ApplicationController
     end
   end
 
+  # Parameters:
+  #
+  # {
+  #   # Product Data
+  #   "name"             => "Product_Name",
+  #
+  #   # Product Associations: 1. Images
+  #   "images" => [
+  #     {
+  #       "url"        => "https://www.example.org/image1.jpg"
+  #     }
+  #     # ...
+  #   ]
+  # }
+
+  # POST /products
+  def create_with_images
+    product_creator = ::ProductCreator.new(user, params)
+
+    if product_creator.valid?
+      if product_creator.publish!
+        render nothing: true, status: :created
+      else
+        render json: product_creator.validation_errors, status: :unprocessable_entity
+      end
+    else
+      render json: product_creator.validation_errors, status: :unprocessable_entity
+    end
+  end
+
   # PATCH/PUT /products/1
   def update
     if @product.update(product_params)

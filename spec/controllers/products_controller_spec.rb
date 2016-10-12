@@ -105,6 +105,19 @@ RSpec.describe ProductsController, :type => :controller do
         }.with_indifferent_access
       end
 
+      # let(:params) do
+      #   { :product =>
+      #     {
+      #       :name => "product1",
+      #       :price => 1,
+      #       :category_id => category.id,
+      #       :stock_quantity => 123,
+      #       :images => [{}]
+      #     },
+      #     format: :json
+      #   }
+      # end
+
       it "creates a new Product" do
         expect { post :create, params }.to change(Product, :count).by(1)
       end

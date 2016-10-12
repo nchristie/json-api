@@ -27,9 +27,11 @@ class OrderCreator
   def publish!
     # Transaction ensures we do not create an order without order_items
     begin
-      order.save!
-      create_order_items(order)
-      order
+      Order.transaction do
+        order.save!
+        create_order_items(order)
+      end
+        order
     rescue ActiveRecord::RecordInvalid => e
       order.tap { |o| o.errors.add(:base, "This Product does not exist.") }
     rescue NoOrderItemsGiven => e

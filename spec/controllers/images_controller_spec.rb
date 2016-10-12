@@ -13,13 +13,11 @@ RSpec.describe ImagesController, :type => :controller do
     render_views
 
     it "returns all images related to the given product" do
-      get :index, { :product_id => product.id, format: :json }
+      get :index, { product_id: product.id, format: :json }
 
       expect(response.code).to eq "200"
 
       result = JSON.parse(response.body)
-
-      puts result
 
       # TODO: Update this spec once view changes
       image = result.first

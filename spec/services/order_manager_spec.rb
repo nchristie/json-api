@@ -3,7 +3,7 @@ require 'rails_helper'
 describe OrderManager do
 
   describe ".user_cancel" do
-    let(:order) { FactoryGirl.create(:order_with_items, id: 868) }
+    let(:order) { FactoryGirl.create(:order_with_items) }
     let(:reason) { "I changed my mind!" }
 
     it 'marks order as cancelled and logs the reason' do
