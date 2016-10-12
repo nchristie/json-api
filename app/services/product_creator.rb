@@ -46,7 +46,7 @@ class ProductCreator
       name:           param(:name),
       price:          param(:price),
       stock_quantity: param(:stock_quantity),
-      category_id:    param(:price)
+      category_id:    param(:category_id)
     }).permit!
   end
 
