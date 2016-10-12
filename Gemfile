@@ -8,6 +8,7 @@ gem 'rack-cors'
 gem 's3', '~> 0.3.24'
 gem 'dotenv-rails'
 gem 'state_machines-activerecord'
+# gem 'react-rails'
 
 group :development, :test do
   gem 'byebug', platform: :mri

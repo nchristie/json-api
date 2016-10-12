@@ -1,5 +1,5 @@
 FactoryGirl.define do
-  factory :image do
+  factory :image_url do
     product
   end
 end
