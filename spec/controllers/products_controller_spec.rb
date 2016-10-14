@@ -85,41 +85,88 @@ RSpec.describe ProductsController, :type => :controller do
     end
   end
 
+  # describe "POST #create" do
+  #   render_views
+
+  #   context "with valid params" do
+  #     let!(:user) { User.create!(id: 1, name: "test", email: "test@test.com", access_token: "e0b466508d4dcdf459f7") }
+
+  #     let!(:category) { FactoryGirl.create(:category, id: 1) }
+
+  #     let(:params) do
+  #       { :product =>
+  #         {
+  #           :name => "test_product",
+  #           :price => 2,
+  #           :stock_quantity => 4,
+  #           :category_id => 1
+  #         },
+  #         format: :json
+  #       }.with_indifferent_access
+  #     end
+
+  #     it "creates a new Product" do
+  #       expect { post :create, params }.to change(Product, :count).by(1)
+  #     end
+
+  #     it "responds with product information when the product creation is successful" do
+  #       post :create, params
+
+  #       expect(response.code).to eq "201"
+
+  #       product = Product.last
+
+  #       expect(product.category_id).to eq 1
+  #       expect(product.name).to eq "test_product"
+  #       expect(product.price).to eq 2
+  #       expect(product.stock_quantity).to eq 4
+  #     end
+  #   end
+
+  #   context "with invalid params" do
+  #     let(:invalid_product_params) do
+  #       { :product =>
+  #         {
+  #           :name => "test_product"
+  #         },
+  #         format: :json
+  #       }.with_indifferent_access
+  #     end
+
+  #     it "renders an informative error if required attributes are missing" do
+  #       post :create, invalid_product_params
+  #       expect(response.code).to eq "422"
+  #       result = JSON.parse(response.body)
+
+  #       expect(result).to eq (
+  #         {
+  #           "category" => ["must exist", "can't be blank"],
+  #           "price" => ["Please add a price."]
+  #         })
+  #     end
+  #   end
+  # end
+
   describe "POST #create" do
-    render_views
 
-    context "with valid params" do
-      let!(:user) { User.create!(id: 1, name: "test", email: "test@test.com", access_token: "e0b466508d4dcdf459f7") }
-
-      let!(:category) { FactoryGirl.create(:category, id: 1) }
-
-      let(:params) do
-        { :product =>
-          {
-            :name => "test_product",
-            :price => 2,
-            :stock_quantity => 4,
-            :category_id => 1
-          },
+    let!(:params) do
+        {
+          :name => "test_product_with_images",
+          :price => 1,
+          :category_id => category.id,
+          :stock_quantity => 123,
+          :images => [
+                       { :data => "testing-image-1" },
+                       { :data => "testing-image-2" }
+                     ],
           format: :json
         }.with_indifferent_access
-      end
+    end
 
-      # let(:params) do
-      #   { :product =>
-      #     {
-      #       :name => "product1",
-      #       :price => 1,
-      #       :category_id => category.id,
-      #       :stock_quantity => 123,
-      #       :images => [{}]
-      #     },
-      #     format: :json
-      #   }
-      # end
-
-      it "creates a new Product" do
+    context "successful request" do
+      it "creates a new Product and an associated image record" do
         expect { post :create, params }.to change(Product, :count).by(1)
+        expect { post :create, params }.to change(Image, :count).by(2)
       end
 
       it "responds with product information when the product creation is successful" do
@@ -130,20 +177,23 @@ RSpec.describe ProductsController, :type => :controller do
         product = Product.last
 
         expect(product.category_id).to eq 1
-        expect(product.name).to eq "test_product"
-        expect(product.price).to eq 2
-        expect(product.stock_quantity).to eq 4
+        expect(product.name).to eq "test_product_with_images"
+        expect(product.price).to eq 1
+        expect(product.stock_quantity).to eq 123
+
+        expect(product.images).to be_a ActiveRecord::Associations::CollectionProxy
+
+        expect(product.images.first.data).to eq "testing-image-1"
+        expect(product.images.last.data).to eq "testing-image-2"
       end
     end
 
     context "with invalid params" do
       let(:invalid_product_params) do
-        { :product =>
           {
-            :name => "test_product"
-          },
-          format: :json
-        }.with_indifferent_access
+            :name => "test_product",
+            format: :json
+          }.with_indifferent_access
       end
 
       it "renders an informative error if required attributes are missing" do
@@ -153,8 +203,7 @@ RSpec.describe ProductsController, :type => :controller do
 
         expect(result).to eq (
           {
-            "category" => ["must exist", "can't be blank"],
-            "price" => ["Please add a price."]
+            "Parameter(s) Missing" => "Check the required keys"
           })
       end
     end

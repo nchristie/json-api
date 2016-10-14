@@ -15,7 +15,7 @@ describe ProductCreator do
     }
   end
 
-  subject { described_class.new(user, params) }
+  subject { described_class.new(params) }
 
   describe "#publish!" do
     context "when successful" do

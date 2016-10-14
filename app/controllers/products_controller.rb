@@ -11,15 +11,15 @@ class ProductsController < ApplicationController
   end
 
   # POST /products
-  def create
-    @product = Product.new(product_params)
+  # def create
+  #   @product = Product.new(product_params)
 
-    if @product.save
-      render nothing: :true, status: :created, location: @product
-    else
-      render json: @product.errors, status: :unprocessable_entity
-    end
-  end
+  #   if @product.save
+  #     render nothing: :true, status: :created, location: @product
+  #   else
+  #     render json: @product.errors, status: :unprocessable_entity
+  #   end
+  # end
 
   # Parameters:
   #
@@ -37,8 +37,12 @@ class ProductsController < ApplicationController
   # }
 
   # POST /products
-  def create_with_images
-    product_creator = ::ProductCreator.new(user, params)
+  def create
+    product_creator = ::ProductCreator.new(params)
+
+    puts '______+++++_______'
+    puts product_creator.valid?
+    puts '______+++++_______'
 
     if product_creator.valid?
       if product_creator.publish!
@@ -70,7 +74,7 @@ class ProductsController < ApplicationController
     @product = Product.find(params[:id])
   end
 
-  def product_params
-    params.require(:product).permit(:name, :price, :category_id, :stock_quantity)
-  end
+  # def product_params
+  #   params.require(:product).permit(:name, :price, :category_id, :stock_quantity, :images)
+  # end
 end

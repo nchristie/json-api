@@ -1,18 +1,17 @@
 class ProductCreator
 
-  attr_reader :user, :params
+  REQUIRED_KEYS = [:name, :price, :category_id, :stock_quantity, :images]
 
-  # user   - the user making the API call.
+  attr_reader :params
+
   # params - the parameters for the product as well as the associated images
-  def initialize(user, params)
-    @user   = user
+  def initialize(params)
     @params = params
   end
 
   # Validates all parameters. Returns +true+ if they are all valid, +false+ otherwise.
   def valid?
-    validations_pass?
-    validation_errors.empty?
+    required_keys_present?
   end
 
   def validation_errors
@@ -58,22 +57,27 @@ class ProductCreator
   def create_images(product)
     Array(param(:images)).each do |image_params|
       image = build_image(image_params)
-      image.save!
+      image.save
     end
   end
 
   def build_image(params)
     # TODO: Add background worker to actually process image data that is passed.
-    Image.new(product_id: product.id)
+    Image.new(
+                  product_id: product.id,
+                  #TODO: image.data will not be string - instead Base64...
+                  data: params[:data]
+                )
   end
 
-  def validations_pass?
-    if product.valid?
-      true
-    else
-      validation_errors.merge!(product.errors.messages)
-      false
+  def required_keys_present?
+    REQUIRED_KEYS.each do |req_key|
+      if params.keys.map(&:to_sym).exclude?(req_key)
+        validation_errors.merge!({"Parameter(s) Missing" => "Check the required keys"})
+        return false
+      end
     end
+    true
   end
 
   def param(key)

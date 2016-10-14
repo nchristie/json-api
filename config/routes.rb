@@ -3,6 +3,7 @@ Rails.application.routes.draw do
   resources :categories
 
   resources :products do
+    # put :create_with_images, on: :member
     resources :images, only: [:index, :create]
   end
 
