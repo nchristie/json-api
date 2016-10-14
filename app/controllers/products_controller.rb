@@ -40,10 +40,6 @@ class ProductsController < ApplicationController
   def create
     product_creator = ::ProductCreator.new(params)
 
-    puts '______+++++_______'
-    puts product_creator.valid?
-    puts '______+++++_______'
-
     if product_creator.valid?
       if product_creator.publish!
         render nothing: true, status: :created

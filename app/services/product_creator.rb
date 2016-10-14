@@ -1,5 +1,18 @@
 class ProductCreator
 
+  class MissingRequiredKeysError < StandardError
+    def initialize(missing_keys)
+      super("Payload missing required keys: #{missing_keys.join(", ")}")
+    end
+  end
+
+  class PriceMustBeGreaterThanZero < StandardError
+    def initialize
+      super("Please ensure your product has a price greater than zero.")
+    end
+  end
+
+
   REQUIRED_KEYS = [:name, :price, :category_id, :stock_quantity, :images]
 
   attr_reader :params
@@ -9,9 +22,12 @@ class ProductCreator
     @params = params
   end
 
-  # Validates all parameters. Returns +true+ if they are all valid, +false+ otherwise.
+  # Validates all parameters. Returns +true+ if they are all valid or raises relevant Error.
   def valid?
-    required_keys_present?
+    required_keys_present!
+    validate_params_formats!
+
+    true
   end
 
   def validation_errors
@@ -70,14 +86,24 @@ class ProductCreator
                 )
   end
 
-  def required_keys_present?
+  def required_keys_present!
+    missing_keys = []
+
     REQUIRED_KEYS.each do |req_key|
       if params.keys.map(&:to_sym).exclude?(req_key)
-        validation_errors.merge!({"Parameter(s) Missing" => "Check the required keys"})
-        return false
+        missing_keys << req_key
       end
     end
-    true
+
+    if missing_keys.present?
+      raise MissingRequiredKeysError.new(missing_keys)
+    end
+  end
+
+  def validate_params_formats!
+    if params[:price].to_i <= 0
+      raise PriceMustBeGreaterThanZero.new
+    end
   end
 
   def param(key)
