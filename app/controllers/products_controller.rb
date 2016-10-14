@@ -42,7 +42,7 @@ class ProductsController < ApplicationController
 
     if product_creator.valid?
       if product_creator.publish!
-        render nothing: true, status: :created
+        render nothing: true, status: :created, location: product_creator.product
       else
         render json: product_creator.validation_errors, status: :unprocessable_entity
       end

@@ -50,11 +50,11 @@ class ProductCreator
     end
   end
 
-  private
-
   def product
     @created_product ||= Product.new(product_params)
   end
+
+  private
 
   def product_params
     ActionController::Parameters.new({

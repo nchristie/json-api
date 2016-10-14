@@ -22,9 +22,12 @@ RSpec.describe ImagesController, :type => :controller do
       # TODO: Update this spec once view changes
       image = result.first
       expect(image).to have_key("created_at")
+      expect(image).to have_key("data")
 
       image = result.second
       expect(image).to have_key("created_at")
+      expect(image).to have_key("data")
+
     end
   end
 end
