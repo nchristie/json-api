@@ -12,6 +12,12 @@ class ProductCreator
     end
   end
 
+  class NoImageDataGiven < StandardError
+    def initialize
+      super("Please provide either a `data` or `url` parameter for your image(s)")
+    end
+  end
+
 
   REQUIRED_KEYS = [:name, :price, :category_id, :stock_quantity, :images]
 
@@ -77,13 +83,34 @@ class ProductCreator
     end
   end
 
+  # Users can either pass either:
+  # 1. Image data to be saved
+  # 2. URL to an image stored elsewhere to be imported (at a later stage.)
   def build_image(params)
-    # TODO: Add background worker to actually process image data that is passed.
-    Image.new(
+    raise NoImageDataGiven unless required_image_data_present?(params)
+
+    if params[:data] # Create an image
+      Image.new(
                   product_id: product.id,
                   #TODO: image.data will not be string - instead Base64...
                   data: params[:data]
                 )
+
+    # Create an image record with an external url
+    # Once the image object is persisted we can trigger a Worker to import this. (Future plan)
+    elsif params[:url]
+       Image.new(
+                  product_id: product.id,
+                  url: params[:url]
+                )
+    end
+  end
+
+  def required_image_data_present?(image_params)
+    image_params.each do |image_param|
+      return false unless (image_params[:url] || image_params[:data])
+    end
+    true
   end
 
   def required_keys_present!
