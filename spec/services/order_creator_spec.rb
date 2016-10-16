@@ -46,6 +46,7 @@ describe OrderCreator do
         expect(order.order_items.size).to eq 2
         expect(order.order_items.first.product_id).to eq product_1.id
         expect(order.order_items.last.product_id).to eq product_2.id
+        expect(order.order_items.last.price).to eq product_2.price
       end
     end
 

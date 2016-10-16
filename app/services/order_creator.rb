@@ -34,6 +34,8 @@ class OrderCreator
         order
     rescue ActiveRecord::RecordInvalid => e
       order.tap { |o| o.errors.add(:base, "This Product does not exist.") }
+    rescue ActiveRecord::RecordNotFound => e
+      order.tap { |o| o.errors.add(:base, "This Product does not exist.") }
     rescue NoOrderItemsGiven => e
       order.tap { |o| o.errors.add(:base, e.message) }
     rescue ActionController::ParameterMissing => e
@@ -62,9 +64,13 @@ class OrderCreator
   end
 
   def build_order_item(params)
+    product = Product.find(params[:product_id])
+
     OrderItem.new(order_id: order.id,
                   product_id: params[:product_id],
-                  quantity: params[:quantity])
+                  quantity: params[:quantity],
+                  # Copy product info at time of order across to each order_item
+                  price: product.price)
   end
 
   def param(key)
