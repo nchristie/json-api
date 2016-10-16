@@ -7,6 +7,13 @@ class OrderCreator
     end
   end
 
+  # Error raised when a promo code is given and it is not recognised/active.
+  class InvalidPromoCodeGiven < StandardError
+    def initialize
+      super("The Promo code provided is invalid.")
+    end
+  end
+
   attr_reader :user, :params
 
   def initialize(user, params)
@@ -30,6 +37,9 @@ class OrderCreator
       Order.transaction do
         order.save!
         create_order_items(order)
+        calculate_total
+
+        apply_promotion_to_order(params) if params[:promotion_code]
       end
         order
     rescue ActiveRecord::RecordInvalid => e
@@ -37,6 +47,8 @@ class OrderCreator
     rescue ActiveRecord::RecordNotFound => e
       order.tap { |o| o.errors.add(:base, "This Product does not exist.") }
     rescue NoOrderItemsGiven => e
+      order.tap { |o| o.errors.add(:base, e.message) }
+    rescue InvalidPromoCodeGiven => e
       order.tap { |o| o.errors.add(:base, e.message) }
     rescue ActionController::ParameterMissing => e
       order.tap { |o| o.errors.add(:base, e.message) }
@@ -71,6 +83,24 @@ class OrderCreator
                   quantity: params[:quantity],
                   # Copy product info at time of order across to each order_item
                   price: product.price)
+  end
+
+  def calculate_total
+    order.order_items.each do |oi|
+      order.total += (oi.price * oi.quantity)
+    end
+  end
+
+  def apply_promotion_to_order(params)
+    promotion = Promotion.where(code: params[:promotion_code]).last
+
+    # Apply discount to total or raise an error
+    if promotion
+      order.total -= promotion.discount
+      order.save!
+    else
+      raise InvalidPromoCodeGiven
+    end
   end
 
   def param(key)

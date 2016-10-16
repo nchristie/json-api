@@ -50,7 +50,7 @@ RSpec.describe "Make Order and then view status", :type => :request do
           {
             "order_id" => id.to_i,
             "state"=>"confirmed",
-            "total"=>nil,
+            "total"=>0,
             "url"=>"http://www.example.com/orders/#{id}.json",
             "created_at"=> "2016-01-01T12:00:00.000Z",
             "order_items" => [

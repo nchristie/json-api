@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161016011213) do
+ActiveRecord::Schema.define(version: 20161016080826) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -42,7 +42,7 @@ ActiveRecord::Schema.define(version: 20161016011213) do
   end
 
   create_table "orders", force: :cascade do |t|
-    t.integer  "total"
+    t.integer  "total",               default: 0
     t.datetime "created_at",                                null: false
     t.datetime "updated_at",                                null: false
     t.integer  "user_id"
@@ -65,10 +65,14 @@ ActiveRecord::Schema.define(version: 20161016011213) do
   end
 
   create_table "promotions", force: :cascade do |t|
-    t.datetime "created_at",  null: false
-    t.datetime "updated_at",  null: false
+    t.datetime "created_at",     null: false
+    t.datetime "updated_at",     null: false
     t.integer  "category_id"
     t.integer  "product_id"
+    t.string   "name"
+    t.string   "code"
+    t.string   "promotion_type"
+    t.integer  "discount"
     t.index ["category_id"], name: "index_promotions_on_category_id", using: :btree
     t.index ["product_id"], name: "index_promotions_on_product_id", using: :btree
   end

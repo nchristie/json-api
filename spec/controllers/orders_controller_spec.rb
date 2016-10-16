@@ -103,7 +103,7 @@ RSpec.describe OrdersController, :type => :controller do
         expect(order.order_items.last.product.name).to eq product_2.name
 
         #TODO: In next improvements.
-        expect(order.total).to eq nil
+        expect(order.total).to eq 0
       end
     end
 
