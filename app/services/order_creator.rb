@@ -94,7 +94,7 @@ class OrderCreator
   def apply_promotion_to_order(params)
     promotion = Promotion.where(code: params[:promotion_code]).last
 
-    # Apply discount to total or raise an error
+    # Apply discount to total or raise an error if no valid promotion exists.
     if promotion
       order.total -= promotion.discount
       order.save!

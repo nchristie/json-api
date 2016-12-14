@@ -11,32 +11,6 @@ class ProductsController < ApplicationController
   end
 
   # POST /products
-  # def create
-  #   @product = Product.new(product_params)
-
-  #   if @product.save
-  #     render nothing: :true, status: :created, location: @product
-  #   else
-  #     render json: @product.errors, status: :unprocessable_entity
-  #   end
-  # end
-
-  # Parameters:
-  #
-  # {
-  #   # Product Data
-  #   "name"             => "Product_Name",
-  #
-  #   # Product Associations: 1. Images
-  #   "images" => [
-  #     {
-  #       "url"        => "https://www.example.org/image1.jpg"
-  #     }
-  #     # ...
-  #   ]
-  # }
-
-  # POST /products
   def create
     product_creator = ::ProductCreator.new(params)
 
