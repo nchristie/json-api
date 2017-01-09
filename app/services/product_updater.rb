@@ -8,7 +8,7 @@ class ProductUpdater
 
   class InvalidParams < StandardError
     def initialize(params)
-      super("There is some issue with the parameters you passed")
+      super("No `product_id` key passed")
     end
   end
 
@@ -24,14 +24,26 @@ class ProductUpdater
       product.price = params["price"]
       product.save!
     else
-      #
+      render_all_errors
     end
   end
 
   private
 
+  def render_all_errors
+    validation_errors.merge!(product.errors.messages)
+  end
+
+  def validation_errors
+    @validation_errors ||= {}
+  end
+
   def params_valid?
-    true
+    if params.include?("id")
+      true
+    else
+      raise InvalidParams.new(params)
+    end
   end
 
   def product_exists?
