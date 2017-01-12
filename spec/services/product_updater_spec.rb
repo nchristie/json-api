@@ -7,18 +7,23 @@ describe ProductUpdater do
   describe "#update!" do
     it "requires a product - raises if no valid product_id given" do
       params = { "a" => 1 }
-      expect { described_class.new(nil, params).update! }.to raise_error ProductUpdater::NoProductFoundForId
+      expect { described_class.new(nil, params).update! }
+        .to raise_error ProductUpdater::NoProductFoundForIdError
     end
 
     it "renders errors if the params are not valid" do
-      params = { "ad" => 1 }
+      product_id, params = product.id, { "ad" => 1 }
 
-      expect{ described_class.new(product, params).update! }
-        .to raise_error ProductUpdater::InvalidParams
+      expect { described_class.new(product_id, params).update! }
+        .to raise_error ProductUpdater::InvalidParamsError
     end
 
     it "renders all errors if there are multiple issues" do
-      # TODO
+      product_id, params = product.id, { "ad" => 1, "price" => "string price" }
+
+      described_class.new(product_id, params).update!
+
+      expect(product.errors[:base]).to include /Some Error/
     end
 
     it "saves the product if everything is valid" do

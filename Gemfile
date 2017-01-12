@@ -8,7 +8,8 @@ gem 'rack-cors'
 gem 's3', '~> 0.3.24'
 gem 'dotenv-rails'
 gem 'state_machines-activerecord'
-# gem 'react-rails'
+gem 'react-rails'
+gem 'webpack-rails', '~> 0.9.5'
 
 group :development, :test do
   gem 'byebug', platform: :mri
@@ -29,3 +30,5 @@ group :development do
 end
 
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
+
+gem 'foreman'

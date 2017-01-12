@@ -1,12 +1,18 @@
 class ProductUpdater
 
-  class NoProductFoundForId < StandardError
+  class NoProductFoundForIdError < StandardError
     def initialize(product_id)
       super("We have no record of a product with id: #{product_id}")
     end
   end
 
-  class InvalidParams < StandardError
+  class InvalidParamsError < StandardError
+    def initialize(params)
+      super("No `product_id` key passed")
+    end
+  end
+
+  class InvalidPriceError < StandardError
     def initialize(params)
       super("No `product_id` key passed")
     end
@@ -31,18 +37,22 @@ class ProductUpdater
   private
 
   def render_all_errors
-    validation_errors.merge!(product.errors.messages)
+    #validation_errors.merge!(product.errors.messages)
+  rescue InvalidParamsError => e
+    product.tap { |p| p.errors.add(:base, e.message) }
+  rescue NoProductFoundForIdError => e
+    product.tap { |p| p.errors.add(:base, e.message) }
   end
 
-  def validation_errors
-    @validation_errors ||= {}
-  end
+  # def validation_errors
+  #   @validation_errors ||= {}
+  # end
 
   def params_valid?
     if params.include?("id")
       true
     else
-      raise InvalidParams.new(params)
+      raise InvalidParamsError.new(params)
     end
   end
 
@@ -54,9 +64,7 @@ class ProductUpdater
     begin
       @product ||= Product.find(product_id)
     rescue ActiveRecord::RecordNotFound
-      raise NoProductFoundForId.new(product_id)
+      raise NoProductFoundForIdError.new(product_id)
     end
   end
-
-
 end
